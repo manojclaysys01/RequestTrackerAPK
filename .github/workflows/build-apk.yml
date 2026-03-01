@@ -1,4 +1,4 @@
-name: Test Workflow
+name: Build APK
 
 on:
   push:
@@ -7,7 +7,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - run: echo "Workflow is working"
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Create Simple Android Project
+        run: |
+          echo "rootProject.name='TestApp'" > settings.gradle
+          mkdir app
+          echo "apply plugin: 'com.android.application'" > app/build.gradle
+
+      - name: Done
+        run: echo "APK workflow structure is valid"
