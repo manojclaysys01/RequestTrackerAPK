@@ -25,22 +25,44 @@ jobs:
 
       - name: Generate Project Files
         run: |
-          echo "rootProject.name='RequestTracker'" > settings.gradle
+          cat > settings.gradle << 'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "RequestTracker"
+          include ':app'
+          EOF
+
           mkdir -p app/src/main/java/com/requesttracker
           mkdir -p app/src/main/res/values
 
           cat > build.gradle << 'EOF'
           buildscript {
-              repositories { google(); mavenCentral() }
+              repositories {
+                  google()
+                  mavenCentral()
+              }
               dependencies {
                   classpath 'com.android.tools.build:gradle:8.1.4'
               }
           }
-          allprojects { repositories { google(); mavenCentral() } }
           EOF
 
           cat > app/build.gradle << 'EOF'
-          apply plugin: 'com.android.application'
+          plugins {
+              id 'com.android.application'
+          }
 
           android {
               namespace 'com.requesttracker'
@@ -53,16 +75,23 @@ jobs:
                   versionCode 1
                   versionName "1.0"
               }
+
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
           }
           EOF
 
       - name: Generate Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.2
+        run: |
+          gradle wrapper --gradle-version 8.2
 
       - name: Build Debug APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
