@@ -20,6 +20,11 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Setup Gradle 8.2
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.2
+
       - name: Generate Project Files
         run: |
           cat > settings.gradle << 'EOF'
@@ -79,16 +84,8 @@ jobs:
           }
           EOF
 
-      - name: Create Gradle Wrapper (8.2 only)
-        run: |
-          mkdir -p gradle/wrapper
-          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.2-bin.zip" > gradle/wrapper/gradle-wrapper.properties
-          curl -s https://raw.githubusercontent.com/gradle/gradle/v8.2/gradlew -o gradlew
-          curl -s https://raw.githubusercontent.com/gradle/gradle/v8.2/gradlew.bat -o gradlew.bat
-          chmod +x gradlew
-
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: gradle assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
